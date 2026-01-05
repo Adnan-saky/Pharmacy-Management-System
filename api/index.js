@@ -14,6 +14,41 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+// --- DEBUG ROUTE (Remove in production if needed) ---
+app.get('/api/debug-connection', async (req, res) => {
+    try {
+        const envCheck = {
+            hasEmail: !!process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL,
+            hasKey: !!process.env.GOOGLE_PRIVATE_KEY,
+            hasSheetId: !!process.env.GOOGLE_SHEETS_SPREADSHEET_ID,
+            keyLength: process.env.GOOGLE_PRIVATE_KEY ? process.env.GOOGLE_PRIVATE_KEY.length : 0,
+            keyStartsWithDash: process.env.GOOGLE_PRIVATE_KEY ? process.env.GOOGLE_PRIVATE_KEY.trim().startsWith('-----BEGIN') : false,
+            keyIncludesNewlines: process.env.GOOGLE_PRIVATE_KEY ? process.env.GOOGLE_PRIVATE_KEY.includes('\n') || process.env.GOOGLE_PRIVATE_KEY.includes('\\n') : false
+        };
+
+        const connectionResult = await sheetsService.testConnection();
+
+        res.json({
+            status: 'success',
+            message: 'Connection successful',
+            envCheck,
+            connectionResult
+        });
+    } catch (error) {
+        res.status(500).json({
+            status: 'error',
+            message: error.message,
+            envCheck: {
+                hasEmail: !!process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL,
+                hasKey: !!process.env.GOOGLE_PRIVATE_KEY,
+                hasSheetId: !!process.env.GOOGLE_SHEETS_SPREADSHEET_ID,
+                keyLength: process.env.GOOGLE_PRIVATE_KEY ? process.env.GOOGLE_PRIVATE_KEY.length : 0
+            },
+            stack: error.stack
+        });
+    }
+});
+
 // Routes
 
 // --- AUTH ROUTES ---
