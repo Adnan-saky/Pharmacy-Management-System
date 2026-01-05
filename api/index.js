@@ -11,11 +11,18 @@ dotenv.config({ path: '.env.local' });
 const app = express();
 
 // Middleware
+// Middleware
 app.use(cors());
 app.use(express.json());
 
-// --- DEBUG ROUTE (Remove in production if needed) ---
-app.get('/api/debug-connection', async (req, res) => {
+// Request logger for debugging Vercel routing
+app.use((req, res, next) => {
+    console.log(`[Request] ${req.method} ${req.url}`);
+    next();
+});
+
+// --- DEBUG ROUTE (Handle both paths to be safe) ---
+const debugHandler = async (req, res) => {
     try {
         const envCheck = {
             hasEmail: !!process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL,
@@ -32,7 +39,8 @@ app.get('/api/debug-connection', async (req, res) => {
             status: 'success',
             message: 'Connection successful',
             envCheck,
-            connectionResult
+            connectionResult,
+            requestUrl: req.url // Echo back the URL seen by Express
         });
     } catch (error) {
         res.status(500).json({
@@ -47,7 +55,11 @@ app.get('/api/debug-connection', async (req, res) => {
             stack: error.stack
         });
     }
-});
+};
+
+app.get('/api/debug-connection', debugHandler);
+app.get('/debug-connection', debugHandler);
+
 
 // Routes
 
