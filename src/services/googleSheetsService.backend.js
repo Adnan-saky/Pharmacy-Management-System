@@ -67,7 +67,16 @@ export const initializeGoogleSheets = async () => {
 
     try {
         // Parse the private key - handle escaped newlines
-        const privateKey = config.googleSheets.privateKey?.replace(/\\n/g, '\n');
+        // Parse and clean the private key (Handle Vercel/Env formatting issues)
+        let privateKey = config.googleSheets.privateKey;
+        if (privateKey) {
+            // 1. Remove surrounding double quotes if present (common env var artifact)
+            if (privateKey.startsWith('"') && privateKey.endsWith('"')) {
+                privateKey = privateKey.slice(1, -1);
+            }
+            // 2. Convert literal \n to actual newlines
+            privateKey = privateKey.replace(/\\n/g, '\n');
+        }
 
         // Create JWT auth client
         const auth = new google.auth.JWT({
