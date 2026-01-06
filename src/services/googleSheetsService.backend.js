@@ -70,7 +70,20 @@ export const initializeGoogleSheets = async () => {
         // Parse and clean the private key (Handle Vercel/Env formatting issues)
         let privateKey = config.googleSheets.privateKey;
         if (privateKey) {
-            // 1. Remove surrounding double quotes if present (common env var artifact)
+            // 0. Handle Base64 encoded key (The Robust Fix)
+            if (!privateKey.trim().startsWith('-----')) {
+                try {
+                    const decoded = Buffer.from(privateKey, 'base64').toString('utf8');
+                    if (decoded.includes('-----BEGIN PRIVATE KEY-----')) {
+                        privateKey = decoded;
+                        console.log('✅ Successfully decoded Base64 private key');
+                    }
+                } catch (e) {
+                    // Not base64, continue as normal
+                }
+            }
+
+            // 1. Remove surrounding double quotes if present
             if (privateKey.startsWith('"') && privateKey.endsWith('"')) {
                 privateKey = privateKey.slice(1, -1);
             }
