@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import API_BASE_URL from '../../config/api';
 import { useAuth } from '../../context/AuthContext';
 import {
     Box,
@@ -53,7 +54,7 @@ const AdminPanel = () => {
 
     const fetchUsers = async () => {
         try {
-            const response = await axios.get('http://localhost:3000/api/users');
+            const response = await axios.get(`${API_BASE_URL}/users`);
             setUsers(response.data);
         } catch (err) {
             console.error('Failed to fetch users', err);
@@ -63,7 +64,7 @@ const AdminPanel = () => {
     const handleCreateUser = async () => {
         setError('');
         try {
-            await axios.post('http://localhost:3000/api/auth/register', newUser);
+            await axios.post(`${API_BASE_URL}/auth/register`, newUser);
             setSuccess('User created successfully');
             setOpen(false);
             setNewUser({ username: '', password: '', full_name: '', role: 'sales-man' });
@@ -77,7 +78,7 @@ const AdminPanel = () => {
     const handleDeleteUser = async (id) => {
         if (window.confirm('Are you sure you want to delete this user?')) {
             try {
-                await axios.delete(`http://localhost:3000/api/users/${id}`);
+                await axios.delete(`${API_BASE_URL}/users/${id}`);
                 setSuccess('User deleted');
                 fetchUsers();
                 setTimeout(() => setSuccess(''), 3000);

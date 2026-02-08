@@ -1,6 +1,9 @@
 // Google Sheets Service - Frontend API Client
-// Connects to our local Express backend (server.js)
-const API_URL = 'http://localhost:3000/api';
+// Connects to our local Express backend (server.js) or Vercel API
+import API_BASE_URL from '../config/api';
+
+// Connects to our local Express backend (server.js) or Vercel API
+const API_URL = API_BASE_URL;
 
 /**
  * Helper to get Auth Headers
